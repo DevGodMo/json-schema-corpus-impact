@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["id", "mode"],
+  "properties": {
+    "id": {"type": "string"},
+    "legacy": {"type": "boolean"},
+    "mode": {"enum": ["live"]}
+  },
+  "additionalProperties": false
+}
