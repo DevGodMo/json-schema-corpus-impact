@@ -1,0 +1,51 @@
+name: JSON Schema Corpus Impact Gate
+description: Compare the same JSON fixture corpus under old and new JSON Schemas and report validity transitions.
+author: Ray Doelare
+inputs:
+  old-schema:
+    description: Path to the old JSON Schema in the caller repository.
+    required: true
+  new-schema:
+    description: Path to the new JSON Schema in the caller repository.
+    required: true
+  fixtures:
+    description: Python glob for representative JSON fixtures, for example tests/fixtures/*.json.
+    required: true
+  format:
+    description: Report format: json or markdown.
+    required: false
+    default: markdown
+  output:
+    description: Report path written in the caller repository.
+    required: false
+    default: json-schema-corpus-impact.md
+  fail-on:
+    description: Gate mode: never, newly-invalid, or any-change.
+    required: false
+    default: newly-invalid
+outputs:
+  report-path:
+    description: Path to the generated report.
+    value: ${{ inputs.output }}
+runs:
+  using: composite
+  steps:
+    - name: Install bounded runtime dependency
+      shell: bash
+      run: python3 -m pip install --disable-pip-version-check -q -r "$GITHUB_ACTION_PATH/requirements.txt"
+    - name: Compare fixture corpus
+      shell: bash
+      env:
+        OLD_SCHEMA: ${{ inputs.old-schema }}
+        NEW_SCHEMA: ${{ inputs.new-schema }}
+        FIXTURES: ${{ inputs.fixtures }}
+        REPORT_FORMAT: ${{ inputs.format }}
+        REPORT_OUTPUT: ${{ inputs.output }}
+        FAIL_ON: ${{ inputs.fail-on }}
+      run: |
+        python3 "$GITHUB_ACTION_PATH/json_schema_corpus_impact.py" \
+          "$OLD_SCHEMA" "$NEW_SCHEMA" \
+          --fixture-glob "$FIXTURES" \
+          --format "$REPORT_FORMAT" \
+          --output "$REPORT_OUTPUT" \
+          --fail-on "$FAIL_ON"
